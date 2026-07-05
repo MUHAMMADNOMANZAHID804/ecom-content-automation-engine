@@ -22,6 +22,7 @@ import uuid
 import logging
 from typing import Any, Dict, List
 
+# FPDF imported for type-reference only — SafeFPDF (below) is what we actually instantiate
 from fpdf import FPDF
 
 from scripts.pdf_text_utils import sanitize_pdf_text, SafeFPDF
@@ -88,9 +89,6 @@ class ReviewAnalyzer:
     # ------------------------------------------------------------------
     # Phase 8 support — final listing summary PDF
     # ------------------------------------------------------------------
-    TITLE_RANGE = (185, 200)
-    BULLET_RANGE = (300, 350)
-    DESC_RANGE = (1700, 1800)
 
     def build_listing_summary_pdf(self, brand: str, platform: str,
                                    sections: Dict[str, Any],
