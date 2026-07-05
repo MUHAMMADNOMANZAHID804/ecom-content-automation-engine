@@ -1,6 +1,17 @@
 import sys
 import os
 
+# --- FIX: Streamlit Cloud has no real TTY, so libraries that use `rich`
+# (directly or via a dependency, e.g. the Groq SDK's error/log rendering)
+# can fail to auto-detect terminal width and get back 0, which makes rich
+# throw "Not enough horizontal space to render a single character."
+# Forcing COLUMNS/LINES here fixes it at the environment level, before any
+# backend module is imported. Backend logic is completely untouched.
+os.environ.setdefault("COLUMNS", "200")
+os.environ.setdefault("LINES", "50")
+os.environ.setdefault("TERM", "xterm-256color")
+os.environ.setdefault("FORCE_COLOR", "0")
+
 # Yeh line Python ko batayegi ke root folder ko bhi check kare
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
