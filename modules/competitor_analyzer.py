@@ -87,11 +87,59 @@ class CompetitorAnalyzer:
 
         return None
 
+    # Recognizable header-cell keywords used to auto-detect which row is the
+    # real header, when it isn't row 0 (some Jungle Scout / sheet exports
+    # have a title row, blank row, or metadata row before the real headers).
+    HEADER_DETECTION_KEYWORDS = [
+        "asin", "title", "product name", "price", "sales", "units sold",
+        "rating", "brand", "reviews",
+    ]
+
+    def _detect_header_row(self, csv_path: str, max_scan_rows: int = 10) -> int:
+        """Scans the first `max_scan_rows` raw rows (no header assumed) and
+        returns the index of the first one that looks like a real header —
+        i.e. contains at least 2 recognizable column-name keywords. Returns
+        0 (assume first row) if nothing better is found.
+
+        Uses Python's csv module rather than pandas here deliberately:
+        pandas' C parser infers the column count from the FIRST row and
+        raises a ParserError on any later row with a different count —
+        which is exactly the shape of the files that need this detection
+        (a 1-column title/metadata row followed by a wider real header).
+        """
+        import csv as _csv
+        try:
+            with open(csv_path, "r", encoding="utf-8", errors="ignore", newline="") as f:
+                reader = _csv.reader(f)
+                for i, row in enumerate(reader):
+                    if i >= max_scan_rows:
+                        break
+                    values = [str(v).strip().lower() for v in row if v and str(v).strip()]
+                    matches = sum(1 for v in values for kw in self.HEADER_DETECTION_KEYWORDS if kw in v)
+                    if matches >= 2:
+                        return i
+        except Exception as e:  # noqa: BLE001
+            logger.warning("Header-row detection failed, assuming row 0: %s", e)
+        return 0
+
     def _load_and_map_columns(self, csv_path: str) -> tuple:
         df = pd.read_csv(csv_path)
 
         sales_col = self._find_column(df, self.SALES_COLUMN_CANDIDATES)
         title_col = self._find_column(df, self.TITLE_COLUMN_CANDIDATES)
+
+        if not sales_col or not title_col:
+            # FIX: some exports have a title/metadata/blank row before the
+            # real header row, so pandas reads everything as 'Unnamed: N'
+            # and column matching fails even though the data is fine.
+            # Auto-detect the real header row and retry once before giving up.
+            header_row = self._detect_header_row(csv_path)
+            if header_row > 0:
+                logger.info("Retrying CSV read with header row detected at index %s", header_row)
+                df = pd.read_csv(csv_path, skiprows=header_row, header=0)
+                sales_col = self._find_column(df, self.SALES_COLUMN_CANDIDATES)
+                title_col = self._find_column(df, self.TITLE_COLUMN_CANDIDATES)
+
         rating_col = self._find_column(df, self.RATING_COLUMN_CANDIDATES)
         reviews_col = self._find_column(df, self.REVIEWS_COLUMN_CANDIDATES)
         brand_col = self._find_column(df, self.BRAND_COLUMN_CANDIDATES)
@@ -295,11 +343,39 @@ class CompetitorAnalyzer:
     # ------------------------------------------------------------------
     # PDF report — now includes a "Top Rated Competitors" section
     # ------------------------------------------------------------------
+    def _draw_table_or_fallback(self, pdf: FPDF, rows: List[Dict[str, Any]]) -> None:
+        """Outermost safety net around _draw_competitor_table: if the table
+        layout itself fails (e.g. an fpdf2 version difference on a
+        deployment host raises on the header row, before per-row recovery
+        even gets a chance to run), fall back to a plain bullet list rather
+        than crashing the whole PDF/competitor-analysis flow."""
+        try:
+            self._draw_competitor_table(pdf, rows)
+        except Exception as e:  # noqa: BLE001
+            logger.warning("Competitor table failed entirely, falling back to bullet list: %s", e)
+            pdf.set_font("Helvetica", "", 10)
+            for c in rows:
+                rating_str = f"{c['star_rating']:.1f}/5" if c.get("star_rating") else "N/A"
+                line = (f"- {sanitize_pdf_text(c.get('title', ''))[:80]}  |  "
+                        f"Sales: {c.get('avg_monthly_sales', 0):.0f}  |  Rating: {rating_str}")
+                pdf.multi_cell(0, 6, line)
+
     def _draw_competitor_table(self, pdf: FPDF, rows: List[Dict[str, Any]]) -> None:
         """Real table with fixed columns: ASIN, Brand, Price, Monthly Units
         Sold, Star Rating, Keywords — matching a proper market-matrix layout
-        instead of a flat bullet list."""
-        col_widths = [22, 22, 16, 24, 16, 90]  # mm, sums to ~190 (A4 usable width)
+        instead of a flat bullet list.
+
+        FIX: "Not enough horizontal space to render a single character" —
+        an fpdf2 exception seen on Streamlit Cloud (different fpdf2 version
+        than local) when column widths sum too close to the page's usable
+        width, or a cell value is empty/oddly formatted. Column widths now
+        total 165mm (comfortable margin under A4's ~190mm usable width,
+        instead of the old 190mm which left zero room for error), every
+        cell value has a non-empty fallback, and the whole per-row render
+        is wrapped so a single bad row can't take down the entire PDF —
+        it falls back to a plain-text line for that row instead.
+        """
+        col_widths = [20, 20, 16, 22, 14, 73]  # mm, sums to 165 (safe margin under ~190mm usable)
         headers = ["ASIN", "Brand", "Price", "Monthly Sold", "Rating", "Title Keywords"]
 
         pdf.set_font("Helvetica", "B", 8)
@@ -310,19 +386,31 @@ class CompetitorAnalyzer:
 
         pdf.set_font("Helvetica", "", 8)
         for c in rows:
-            title_kws = ", ".join(self.extract_keywords([c.get("title", "")], top_n=4))
-            rating_str = f"{c['star_rating']:.1f}" if c.get("star_rating") else "N/A"
-            cells = [
-                sanitize_pdf_text(c.get("asin", ""))[:12],
-                sanitize_pdf_text(c.get("brand", ""))[:12],
-                sanitize_pdf_text(c.get("price", ""))[:8],
-                f"{c.get('avg_monthly_sales', 0):.0f}",
-                rating_str,
-                sanitize_pdf_text(title_kws)[:55],
-            ]
-            for w, val in zip(col_widths, cells):
-                pdf.cell(w, 7, val, border=1)
-            pdf.ln()
+            try:
+                title_kws = ", ".join(self.extract_keywords([c.get("title", "")], top_n=4))
+                rating_str = f"{c['star_rating']:.1f}" if c.get("star_rating") else "N/A"
+                cells = [
+                    sanitize_pdf_text(c.get("asin", "") or "-")[:12] or "-",
+                    sanitize_pdf_text(c.get("brand", "") or "-")[:12] or "-",
+                    sanitize_pdf_text(c.get("price", "") or "-")[:8] or "-",
+                    f"{c.get('avg_monthly_sales', 0):.0f}",
+                    rating_str,
+                    (sanitize_pdf_text(title_kws)[:45] or sanitize_pdf_text(c.get("title", ""))[:45] or "-"),
+                ]
+                for w, val in zip(col_widths, cells):
+                    pdf.cell(w, 7, val, border=1)
+                pdf.ln()
+            except Exception as e:  # noqa: BLE001
+                # Never let one row's layout quirk crash the whole PDF —
+                # fall back to a single plain-text line for this row.
+                logger.warning("Competitor table row failed to render, falling back to text: %s", e)
+                pdf.set_font("Helvetica", "", 8)
+                fallback_line = sanitize_pdf_text(
+                    f"{c.get('asin', '-')}  {c.get('brand', '-')}  "
+                    f"{c.get('price', '-')}  {c.get('avg_monthly_sales', 0):.0f}  "
+                    f"{c.get('title', '')[:60]}"
+                )
+                pdf.cell(0, 7, fallback_line, border=1, ln=True)
 
     def build_pdf_report(self, gap_report: Dict[str, Any], brand: str = "") -> str:
         pdf = FPDF()
@@ -338,7 +426,7 @@ class CompetitorAnalyzer:
         pdf.cell(0, 8, "Phase 1: Top 5 Competitors Market Matrix (by Monthly Units Sold)", ln=True)
         top5 = gap_report.get("top5", [])
         if top5:
-            self._draw_competitor_table(pdf, top5)
+            self._draw_table_or_fallback(pdf, top5)
         else:
             pdf.set_font("Helvetica", "", 10)
             pdf.multi_cell(0, 6, "No competitor rows found in this export.")
@@ -348,7 +436,7 @@ class CompetitorAnalyzer:
         if top_rated:
             pdf.set_font("Helvetica", "B", 12)
             pdf.cell(0, 8, "Top Rated Competitors (Customer Satisfaction Signal)", ln=True)
-            self._draw_competitor_table(pdf, top_rated)
+            self._draw_table_or_fallback(pdf, top_rated)
             pdf.ln(2)
             pdf.set_font("Helvetica", "I", 8)
             pdf.multi_cell(
