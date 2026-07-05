@@ -1,3 +1,12 @@
+import sys
+import os
+
+# Yeh line Python ko batayegi ke root folder ko bhi check kare
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+
+import streamlit as st
+from core.manager import PipelineManager
+from tools.scrapper_mcp import Scrape
 """
 ui/app.py
 ---------
