@@ -62,6 +62,19 @@ class CompetitorAnalyzer:
     PRICE_COLUMN_CANDIDATES = ["Price"]
     ASIN_COLUMN_CANDIDATES = ["ASIN"]
 
+    # NEW — additional Jungle Scout signals worth capturing (per your CSV):
+    # BSR (Best Seller Rank — lower is more competitive, independent of raw
+    # unit count), Monthly Revenue ($, different signal than unit volume —
+    # a lower-volume/higher-price competitor can out-earn a high-volume one),
+    # Fulfillment (FBA vs FBM — affects how hard a competitor is to beat on
+    # shipping/Prime eligibility), Category, and Seller Count (more sellers
+    # on one listing = more price competition on that exact product).
+    BSR_COLUMN_CANDIDATES = ["BSR", "Best Sellers Rank", "Best Seller Rank"]
+    REVENUE_COLUMN_CANDIDATES = ["Monthly Revenue", "Net Revenue"]
+    FULFILLMENT_COLUMN_CANDIDATES = ["Fulfillment"]
+    CATEGORY_COLUMN_CANDIDATES = ["Category"]
+    SELLERS_COLUMN_CANDIDATES = ["No. of Sellers", "Number of Sellers", "Sellers"]
+
     # ------------------------------------------------------------------
     # Column resolution (fuzzy — survives Jungle Scout export changes)
     # ------------------------------------------------------------------
@@ -140,12 +153,6 @@ class CompetitorAnalyzer:
                 sales_col = self._find_column(df, self.SALES_COLUMN_CANDIDATES)
                 title_col = self._find_column(df, self.TITLE_COLUMN_CANDIDATES)
 
-        rating_col = self._find_column(df, self.RATING_COLUMN_CANDIDATES)
-        reviews_col = self._find_column(df, self.REVIEWS_COLUMN_CANDIDATES)
-        brand_col = self._find_column(df, self.BRAND_COLUMN_CANDIDATES)
-        price_col = self._find_column(df, self.PRICE_COLUMN_CANDIDATES)
-        asin_col = self._find_column(df, self.ASIN_COLUMN_CANDIDATES)
-
         if not sales_col or not title_col:
             raise ValueError(
                 "Could not find a sales-volume column or a title/product-name "
@@ -155,7 +162,23 @@ class CompetitorAnalyzer:
                 "modules/competitor_analyzer.py."
             )
 
-        return df, sales_col, title_col, rating_col, reviews_col, brand_col, price_col, asin_col
+        cols = {
+            "sales": sales_col,
+            "title": title_col,
+            "rating": self._find_column(df, self.RATING_COLUMN_CANDIDATES),
+            "reviews": self._find_column(df, self.REVIEWS_COLUMN_CANDIDATES),
+            "brand": self._find_column(df, self.BRAND_COLUMN_CANDIDATES),
+            "price": self._find_column(df, self.PRICE_COLUMN_CANDIDATES),
+            "asin": self._find_column(df, self.ASIN_COLUMN_CANDIDATES),
+            # NEW signals — any of these may be None if the CSV doesn't have
+            # them; every downstream use already handles None gracefully.
+            "bsr": self._find_column(df, self.BSR_COLUMN_CANDIDATES),
+            "revenue": self._find_column(df, self.REVENUE_COLUMN_CANDIDATES),
+            "fulfillment": self._find_column(df, self.FULFILLMENT_COLUMN_CANDIDATES),
+            "category": self._find_column(df, self.CATEGORY_COLUMN_CANDIDATES),
+            "sellers": self._find_column(df, self.SELLERS_COLUMN_CANDIDATES),
+        }
+        return df, cols
 
     def _safe_float(self, value: Any) -> Optional[float]:
         """Strips currency symbols, thousands separators, and whitespace
@@ -170,67 +193,69 @@ class CompetitorAnalyzer:
         except ValueError:
             return None
 
-    def _row_to_dict(self, row, title_col, sales_col, rating_col, reviews_col,
-                      brand_col, price_col, asin_col) -> Dict[str, Any]:
-        sales_val = self._safe_float(row.get(sales_col))
-        rating_val = self._safe_float(row.get(rating_col)) if rating_col else None
-        reviews_val = self._safe_float(row.get(reviews_col)) if reviews_col else None
+    def _row_to_dict(self, row, cols: Dict[str, Optional[str]]) -> Dict[str, Any]:
+        def _str(field: str) -> str:
+            col = cols.get(field)
+            return str(row[col]) if col and pd.notna(row.get(col)) else ""
+
+        sales_val = self._safe_float(row.get(cols["sales"]))
+        rating_val = self._safe_float(row.get(cols["rating"])) if cols.get("rating") else None
+        reviews_val = self._safe_float(row.get(cols["reviews"])) if cols.get("reviews") else None
+        bsr_val = self._safe_float(row.get(cols["bsr"])) if cols.get("bsr") else None
+        sellers_val = self._safe_float(row.get(cols["sellers"])) if cols.get("sellers") else None
+
         return {
-            "title": str(row[title_col]),
+            "title": str(row[cols["title"]]),
             "avg_monthly_sales": sales_val if sales_val is not None else 0.0,
             "star_rating": rating_val,
             "review_count": int(reviews_val) if reviews_val is not None else None,
-            "brand": str(row[brand_col]) if brand_col and pd.notna(row.get(brand_col)) else "",
-            "price": str(row[price_col]) if price_col and pd.notna(row.get(price_col)) else "",
-            "asin": str(row[asin_col]) if asin_col and pd.notna(row.get(asin_col)) else "",
+            "brand": _str("brand"),
+            "price": _str("price"),
+            "asin": _str("asin"),
+            # NEW signals (per your request to use more of the sheet):
+            "bsr": int(bsr_val) if bsr_val is not None else None,
+            "monthly_revenue": _str("revenue"),
+            "fulfillment": _str("fulfillment"),
+            "category": _str("category"),
+            "seller_count": int(sellers_val) if sellers_val is not None else None,
         }
 
     # ------------------------------------------------------------------
     # Ranking #1 — by sales volume (drives the main gap report)
     # ------------------------------------------------------------------
     def get_top5_by_avg_monthly_sales(self, csv_path: str) -> List[Dict[str, Any]]:
-        (df, sales_col, title_col, rating_col, reviews_col,
-         brand_col, price_col, asin_col) = self._load_and_map_columns(csv_path)
+        df, cols = self._load_and_map_columns(csv_path)
 
         df = df.copy()
-        df["_sales_numeric"] = df[sales_col].apply(self._safe_float).fillna(0.0)
+        df["_sales_numeric"] = df[cols["sales"]].apply(self._safe_float).fillna(0.0)
         top5 = df.sort_values(by="_sales_numeric", ascending=False).head(5)
 
-        return [
-            self._row_to_dict(row, title_col, sales_col, rating_col, reviews_col,
-                               brand_col, price_col, asin_col)
-            for _, row in top5.iterrows()
-        ]
+        return [self._row_to_dict(row, cols) for _, row in top5.iterrows()]
 
     # ------------------------------------------------------------------
     # Ranking #2 — by star rating (customer-satisfaction signal you asked for)
     # Filters out low-review-count outliers so a 5.0 on 3 reviews doesn't win.
     # ------------------------------------------------------------------
     def get_top5_by_star_rating(self, csv_path: str) -> List[Dict[str, Any]]:
-        (df, sales_col, title_col, rating_col, reviews_col,
-         brand_col, price_col, asin_col) = self._load_and_map_columns(csv_path)
+        df, cols = self._load_and_map_columns(csv_path)
 
-        if not rating_col:
+        if not cols.get("rating"):
             logger.warning("No star-rating column found in this CSV; skipping rating ranking.")
             return []
 
         df = df.copy()
-        df["_rating_numeric"] = df[rating_col].apply(self._safe_float)
+        df["_rating_numeric"] = df[cols["rating"]].apply(self._safe_float)
         df = df[df["_rating_numeric"].notna()]
 
-        if reviews_col:
-            df["_reviews_numeric"] = df[reviews_col].apply(self._safe_float).fillna(0.0)
+        if cols.get("reviews"):
+            df["_reviews_numeric"] = df[cols["reviews"]].apply(self._safe_float).fillna(0.0)
             df = df[df["_reviews_numeric"] >= MIN_REVIEWS_FOR_RATING_SIGNAL]
 
         if df.empty:
             return []
 
         top5 = df.sort_values(by="_rating_numeric", ascending=False).head(5)
-        return [
-            self._row_to_dict(row, title_col, sales_col, rating_col, reviews_col,
-                               brand_col, price_col, asin_col)
-            for _, row in top5.iterrows()
-        ]
+        return [self._row_to_dict(row, cols) for _, row in top5.iterrows()]
 
     # ------------------------------------------------------------------
     # Keyword extraction (deterministic, no LLM — same as before)
@@ -412,7 +437,7 @@ class CompetitorAnalyzer:
                 )
                 pdf.cell(0, 7, fallback_line, border=1, ln=True)
 
-    def build_pdf_report(self, gap_report: Dict[str, Any], brand: str = "") -> str:
+    def _build_pdf_report_impl(self, gap_report: Dict[str, Any], brand: str = "") -> str:
         pdf = FPDF()
         pdf.add_page()
         pdf.set_font("Helvetica", "B", 16)
@@ -447,6 +472,46 @@ class CompetitorAnalyzer:
                 )
             )
             pdf.ln(4)
+
+        # --- NEW: Market Insights — BSR, Revenue, Fulfillment, Sellers ---
+        if top5:
+            pdf.set_font("Helvetica", "B", 12)
+            pdf.cell(0, 8, "Market Insights", ln=True)
+            pdf.set_font("Helvetica", "", 10)
+
+            with_bsr = [c for c in top5 if c.get("bsr")]
+            if with_bsr:
+                best_bsr = min(with_bsr, key=lambda c: c["bsr"])
+                pdf.multi_cell(0, 6, sanitize_pdf_text(
+                    f"Most competitive by Best Seller Rank: "
+                    f"{best_bsr.get('title', '')[:70]} (BSR #{best_bsr['bsr']:,}) "
+                    "— lower BSR means it outsells more of the category than raw "
+                    "unit counts alone show."
+                ))
+
+            with_revenue = [c for c in top5 if c.get("monthly_revenue")]
+            if with_revenue:
+                pdf.multi_cell(0, 6, sanitize_pdf_text(
+                    "Monthly revenue (top 5): " +
+                    ", ".join(f"{c.get('monthly_revenue', '-')}" for c in with_revenue)
+                ))
+
+            fba_count = sum(1 for c in top5 if str(c.get("fulfillment", "")).upper() == "FBA")
+            if fba_count:
+                pdf.multi_cell(0, 6, sanitize_pdf_text(
+                    f"Fulfillment: {fba_count}/{len(top5)} top competitors use FBA "
+                    "(Prime-eligible, harder to compete against on shipping)."
+                ))
+
+            seller_counts = [c["seller_count"] for c in top5 if c.get("seller_count")]
+            if seller_counts:
+                crowded = [c for c in top5 if c.get("seller_count", 0) and c["seller_count"] > 3]
+                if crowded:
+                    pdf.multi_cell(0, 6, sanitize_pdf_text(
+                        f"{len(crowded)} of your top 5 competitors already have 3+ "
+                        "sellers on the same listing — expect price competition there."
+                    ))
+            pdf.ln(3)
 
         # --- Phase 2: Actionable Sourcing & Copywriting Solutions ---
         pdf.set_font("Helvetica", "B", 12)
@@ -493,4 +558,57 @@ class CompetitorAnalyzer:
         path = os.path.join(REPORTS_DIR, filename)
         pdf.output(path)
         logger.info("Competitor PDF report written to %s", path)
+        return path
+
+    def build_pdf_report(self, gap_report: Dict[str, Any], brand: str = "") -> str:
+        """
+        Public entry point — wraps the full report build in a top-level
+        safety net. Whatever the exact fpdf2 version-specific cause of
+        "Not enough horizontal space to render a single character" turns out
+        to be on a given deployment host, this guarantees the competitor
+        analysis flow ALWAYS produces a PDF (even a minimal one) instead of
+        crashing the whole tool.
+        """
+        try:
+            return self._build_pdf_report_impl(gap_report, brand)
+        except Exception as e:  # noqa: BLE001
+            logger.error("Full competitor PDF report failed (%s) — falling back "
+                         "to a minimal plain-text version.", e)
+            return self._build_minimal_fallback_pdf(gap_report, brand)
+
+    def _build_minimal_fallback_pdf(self, gap_report: Dict[str, Any], brand: str = "") -> str:
+        """Ultra-safe fallback: no tables, no fixed-width cells — just
+        full-width multi_cell() text, which cannot trigger the same
+        column-width failure mode as the table layout."""
+        pdf = FPDF()
+        pdf.add_page()
+        pdf.set_font("Helvetica", "B", 16)
+        pdf.cell(0, 10, "Competitor Analysis Report", ln=True)
+        pdf.set_font("Helvetica", "", 10)
+        pdf.multi_cell(0, 6, sanitize_pdf_text(f"Brand: {brand or 'N/A'}"))
+        pdf.ln(4)
+
+        pdf.set_font("Helvetica", "B", 12)
+        pdf.cell(0, 8, "Top Competitors (by Monthly Units Sold)", ln=True)
+        pdf.set_font("Helvetica", "", 10)
+        for c in gap_report.get("top5", []):
+            rating_str = f"{c['star_rating']:.1f}/5" if c.get("star_rating") else "N/A"
+            pdf.multi_cell(0, 6, sanitize_pdf_text(
+                f"- {c.get('title', '')[:90]} | Sales: {c.get('avg_monthly_sales', 0):.0f} "
+                f"| Rating: {rating_str} | Price: {c.get('price', '-')}"
+            ))
+        pdf.ln(3)
+
+        pdf.set_font("Helvetica", "B", 12)
+        pdf.cell(0, 8, "Keywords & Summary", ln=True)
+        pdf.set_font("Helvetica", "", 10)
+        pdf.multi_cell(0, 6, sanitize_pdf_text(
+            "Keywords: " + ", ".join(gap_report.get("competitor_keywords", [])[:15])
+        ))
+        pdf.multi_cell(0, 6, sanitize_pdf_text(gap_report.get("summary", "")))
+
+        filename = f"competitor_report_{uuid.uuid4().hex[:8]}.pdf"
+        path = os.path.join(REPORTS_DIR, filename)
+        pdf.output(path)
+        logger.info("Minimal fallback competitor PDF written to %s", path)
         return path
