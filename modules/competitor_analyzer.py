@@ -25,7 +25,18 @@ import pandas as pd
 # FPDF imported for type-reference only — SafeFPDF (below) is what we actually instantiate
 from fpdf import FPDF
 
-from scripts.pdf_text_utils import sanitize_pdf_text, SafeFPDF
+try:
+    from scripts.pdf_text_utils import sanitize_pdf_text, SafeFPDF
+except ImportError:  # pragma: no cover
+    # FIX: this exact ImportError has happened repeatedly from partial
+    # deploys (this file updated to import SafeFPDF before
+    # scripts/pdf_text_utils.py was pushed with the SafeFPDF class defined).
+    # An ImportError here kills the ENTIRE app at startup, not just PDF
+    # generation — so if pdf_text_utils.py is somehow still the old version,
+    # fall back to plain FPDF (losing the extra crash-resilience, but the
+    # app stays up) instead of crashing on import.
+    from scripts.pdf_text_utils import sanitize_pdf_text
+    from fpdf import FPDF as SafeFPDF
 
 logger = logging.getLogger("competitor_analyzer")
 
