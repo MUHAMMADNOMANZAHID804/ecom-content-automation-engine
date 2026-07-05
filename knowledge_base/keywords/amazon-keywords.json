@@ -1,0 +1,76 @@
+{
+    "_meta": {
+        "description": "Amazon keyword templates and openers for elite listing generation",
+        "version": "4.0",
+        "usage": "Loaded by SEO Agent in Phase 3 keyword synthesis"
+    },
+    "bullet_openers": [
+        "PREMIUM QUALITY",
+        "ULTRA DURABLE",
+        "EASY TO USE",
+        "FAST DELIVERY",
+        "100% SAFE MATERIAL",
+        "SUPERIOR PERFORMANCE",
+        "PROFESSIONAL GRADE",
+        "ERGONOMIC DESIGN",
+        "MULTI-FUNCTIONAL",
+        "LONG LASTING",
+        "LIGHTWEIGHT & PORTABLE",
+        "HEAVY DUTY",
+        "ECO FRIENDLY",
+        "WATER RESISTANT",
+        "HEAT RESISTANT",
+        "SCRATCH RESISTANT",
+        "ANTI-SLIP BASE",
+        "COMPACT DESIGN",
+        "WIDE COMPATIBILITY",
+        "SATISFACTION GUARANTEED"
+    ],
+    "title_structure": "[Product] by [Brand] / [KW1] / [KW2] / [KW3] / [KW4] / [KW5] for [Use + Feature].",
+    "char_targets": {
+        "title_min": 185,
+        "title_max": 200,
+        "bullet_min": 300,
+        "bullet_max": 350,
+        "bullet_count": 5,
+        "description_min": 1700,
+        "description_max": 1800
+    },
+    "description_sections": [
+        "Product Details",
+        "Product Features",
+        "Product Benefits",
+        "Use Instructions",
+        "Care Instructions",
+        "Why Choose Us?"
+    ],
+    "description_section_guidance": {
+        "Product Details": "2-3 sentences. Materials, weight, dimensions, certifications.",
+        "Product Features": "3-4 sentences. Key features. Tier-2 keywords woven in.",
+        "Product Benefits": "4-5 sentences. LONGEST section. Features to outcomes. Counter 3 pain points. Tier-3 keyword.",
+        "Use Instructions": "2-3 sentences. Clear directions. One pro tip.",
+        "Care Instructions": "2-3 sentences. Specific temperatures, storage.",
+        "Why Choose Us?": "2-3 sentences. Guarantee. CTA. Tier-1 keyword."
+    },
+    "keyword_tiers": {
+        "tier_1": "Primary — highest volume — use in title and first bullet",
+        "tier_2": "Secondary — feature-based — use in bullets 2-4 and description features",
+        "tier_3": "LSI/Long-tail — intent-based — use in description benefits and backend"
+    },
+    "hard_constraints": {
+        "title": "185-200 chars exactly",
+        "bullets": "Exactly 5, each 300-350 chars (marker excluded)",
+        "description": "1700-1800 chars total across all sections",
+        "no_brand_in_description": true,
+        "no_competitor_names": true,
+        "no_external_urls": true
+    },
+    "planning_steps": [
+        "Select 5 ALL-CAPS keyword openers from bullet_openers list",
+        "Map each competitor pain point to exactly one bullet",
+        "Count characters precisely before writing each section",
+        "Place Tier-1 keyword in title first 80 chars",
+        "Weave exactly 2 keywords per bullet",
+        "Track running description char count across sections"
+    ]
+}
