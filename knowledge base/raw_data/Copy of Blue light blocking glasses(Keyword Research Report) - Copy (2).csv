@@ -1,0 +1,330 @@
+,,,
+ First copy final kws from 2nd sheet (seed kws) ,,,
+ Then copy  kws from 3rd sheet (Reverse ASIN) and paste below it ,,,
+" After that, remove duplicates.. That will be our all kws ",,,
+,,,
+,,,
+,Software,Keywords,MW Search Vol
+,MW,blue light blocking glasses,2588342
+,MW,blue light blocking glasses women,397935
+,MW,computer glasses,341853
+,H10,halloween lights,228885
+,H10,computer desk,212857
+,H10,gaming pc,203633
+,H10,gaming pc,203633
+,H10,xbox one,195319
+,H10,blue light blocking glasses,190616
+,H10,blue light blocking glasses,190616
+,H10,computer glasses women,151519
+,H10,gaming glasses,127934
+,MW,playstation 4,122775
+,H10,blue light blocking glasses women,108202
+,MW,blue light blocking glasses women,108202
+,H10,blue blocking glasses,94569
+,H10,xbox one x,90973
+,H10,ps4 pro,90966
+,H10,reading glasses,83461
+,H10,black light,77076
+,MW,black light,77076
+,H10,nutuff blue light glasses,77013
+,H10,nutuff blue light glasses,77013
+,H10,lifeart blue-light blocking glasses,66441
+,H10,game glasses,64845
+,H10,blue light glasses,63897
+,H10,blue light glasses,63897
+,H10,anrri blue light blocking glasses,58701
+,H10,anrri blue light blocking computer glasses,57451
+,H10,colored contact lenses,53973
+,H10,gaming monitor,52939
+,H10,reading glasses women,45714
+,H10,gaming computer,45687
+,H10,gaming computer,45687
+,MW,ps4 console,45681
+,MW,tijn blue light blocking glasses,41995
+,H10,antiglare computer glasses,41909
+,H10,blue-light blocking glasses,40926
+,H10,tjin blue light blocking glasses women,39993
+,MW,prospek computer glasses,39529
+,MW,meetsun blue light blocking glasses 2 pack,38201
+,H10,gunnar optiks computer glasses,36919
+,H10,tijn blue light blocking glasses women,35991
+,H10,reading glasses men,35681
+,H10,anti glare computer glasses,35177
+,H10,blue ray glasses,34849
+,H10,xbox 360,34419
+,H10,doldoa tempered glass computer monitor stand,33606
+,H10,blue blocking glasses women,32161
+,H10,uvex blue blocking glasses,29813
+,H10,cgid ct84 computer glasses,29737
+,H10,tijn blue light blocking glasses square nerd eyeglasses frame,29514
+,MW,cyxus blue light blocking glasses,29500
+,MW,pc gaming,28900
+,MW,prive revaux blue light blocking glasses,28639
+,H10,uv light,28381
+,MW,uv light,28381
+,H10,computer glasses,28374
+,MW,computer glasses,28374
+,H10,reading light,28368
+,MW,reading light,28368
+,MW,ps4 accessories,28313
+,MW,gunnar computer glasses,27687
+,H10,blue light blocking glasses for men,27345
+,H10,eyekeeper computer reading glasses,26854
+,H10,computer reading glasses,25989
+,MW,blue-blocking glasses,25942
+,MW,roulette shot glass game,25868
+,H10,tijn blue light blocking glasses square nerd,23176
+,MW,cyxus blue light blocking glasses women,23135
+,MW,eyehopper computer glasses,22449
+,MW,tijn blue light blocking glasses square nerd eyeglasses frame women,22329
+,MW,fitover blue light blocking glasses,21400
+,MW,gunnar gaming glasses,20473
+,MW,lifeart blue-light blocking glasses 1.50,20413
+,H10,eyebrow tint,20390
+,H10,blue light glasses women,20387
+,MW,blue light glasses women,20387
+,H10,anyluv computer glasses,20270
+,H10,uvex skyper blue light blocking computer glasses,19775
+,H10,fonhcoo computer glasses,19399
+,H10,eyekepper computer glasses,19178
+,H10,anrri blue light blocking glasses for computer use,18807
+,H10,ergonomic keyboard,18486
+,H10,fake glasses,18471
+,H10,fake glasses,18471
+,H10,livho blue light blocking glasses,18351
+,H10,gekkale blue light blocking glasses,18248
+,H10,vvdqella blue light blocking glasses,18191
+,MW,cyxus blue light filter computer glasses,18084
+,MW,vdt computer glasses,18072
+,MW,bluvue computer glasses,17810
+,MW,lifeart blue light blocking glasses women,17704
+,MW,anrri blue light blocking glasses for computer use anti eyestrain,17595
+,MW,nvidia shield,17324
+,H10,blue light blocking glasses for men,17309
+,MW,blue light blocking glasses for men,17309
+,MW,xbox one console,17298
+,MW,computer glasses men,17291
+,MW,blue livht blocking glasses,17225
+,MW,firmoo computer glasses,16176
+,MW,glare reducing glasses for computer,16174
+,MW,beison computer glasses anti blue light,16156
+,H10,video game glasses,15856
+,H10,50 computer glasses,15763
+,H10,firmoo blue light blocking glasses,15750
+,H10,1.5 computer glasses,15701
+,H10,gaming glasses,15616
+,MW,gaming glasses,15616
+,MW,kenzhou blue light blocking glasses,15355
+,MW,tijn-blocking-glasses-eyeglasses-computer,15311
+,MW,gamma ray blue light blocking glasses,15275
+,MW,cyxus computer glasses,15233
+,H10,blue-light blocking glasses women,15078
+,H10,feiyold blue light blocking glasses,15019
+,H10,blue light blocking glasses kids,15011
+,H10,doovic blue light blocking glasses,14842
+,MW,men blue light blocking glasses,14833
+,MW,livho blue light blocking glasses women,14786
+,MW,debuff computer glasses,14642
+,MW,lizho computer glasses,14642
+,MW,prospek anti blue light computer glasses,14350
+,MW,ps4 vr,14013
+,H10,alcohol prep pads,14011
+,MW,gaming accessories,14010
+,H10,lens wipes,14007
+,MW,game boy,13676
+,H10,playstation vr,13653
+,H10,smart glasses,13408
+,H10,xbox one accessories,13321
+,H10,game glasses women,13266
+,H10,firmoo blue light blocking glasses women,13156
+,MW,qjoy blue light anti-radiation computer glasses,13138
+,MW,feiyold blue light blocking glasses women,13033
+,MW,eyeyee blue light blocking glasses,12951
+,MW,computer glasses for women,12848
+,MW,k kenzhou blue light blocking computer glasses 2 pack,12753
+,MW,blutech computer glasses,12538
+,MW,75 computer glasses,12468
+,MW,fitover 99.5% blue blocking computer glasses,12426
+,MW,livho blue light blocking computer glasses,12322
+,H10,joschoo computer reading glasses,12283
+,H10,4est blue light blocking glasses,12252
+,H10,face glasses for women,11886
+,H10,face glasses for women,11886
+,MW,sims 4,11885
+,H10,rose gold,11882
+,MW,samsung gear,11877
+,H10,eye glasses,11873
+,MW,eye glasses,11873
+,MW,annri blue light blocking glasses,11847
+,MW,felix gray computer glasses,11692
+,MW,uv computer glasses for women,11527
+,MW,slocyclub blue light blocking glasses,11505
+,MW,anyluv blue light blocking glasses,11290
+,MW,computer glasses set,11282
+,MW,fps gaming glasses,11189
+,MW,53mm blue light blocking glasses,11174
+,MW,eyeyee blue light blocking reading glasses,11060
+,MW,yvonne glass computer desk,11041
+,H10,gameboy advance,10987
+,H10,optifine computer glasses,10868
+,H10,contact lens,10735
+,H10,happy light,10730
+,H10,playstation 4 console,10609
+,H10,xbox one x console,10609
+,H10,inluever computer glasses,10571
+,H10,doovic 4 pack computer reading glasses blue light blocking anti,10496
+,H10,bluelight glasses womens,10303
+,H10,bluelight glasses womens,10303
+,H10,livho blue light blocking glasses filter uv glare retro,10286
+,H10,dollger blue light blocking glasses,10274
+,MW,cyux blue light blocking glasses,10238
+,MW,blue-blocking reading glasses,10229
+,MW,firmoo blue light blocking glasses vintage cat eye computer,10203
+,MW,mens computer glasses,10167
+,MW,gameboy color,10151
+,MW,cyrus blue light filter computer glasses,10125
+,MW,blban blue light blocking glasses,10104
+,MW,simvey blue light blocking glasses,9943
+,MW,computer glasses for men,9928
+,MW,25 computer glasses,9745
+,MW,0.5 computer glasses,9716
+,MW,ifhtech blue light blocking glasses,9691
+,MW,tjin blue light blocking glasses men,9608
+,H10,blue livht blocking glasses for women,9608
+,H10,0.50 computer glasses,9426
+,H10,cyexus blue light blocking glasses,9345
+,H10,umizato computer glasses,9212
+,H10,annri blue light blocking glasses women,9188
+,H10,uv glasses for computer,9130
+,H10,feidu blue light blocking glasses,9040
+,H10,wealthyshades blue light blocking glasses,9038
+,MW,chemtech computer glasses,8978
+,MW,gunner glasses for computer,8924
+,MW,e-specs computer glasses,8808
+,MW,trifocal reading computer glasses,8731
+,MW,glass computer,8725
+,MW,tanlys blue light blocking glasses,8722
+,MW,jandsvision computer glasses,8704
+,MW,gaoye blue light blocking glasses,8662
+,MW,mens computer reading glasses,8634
+,MW,eyeyee computer reading glasses blue light blocking,8609
+,H10,unmagnified computer glasses,8605
+,MW,cyxus blue light filter computer glasses for blocking uv headache,8586
+,H10,shilded computer glasses,8525
+,H10,shielded computer glasses,8522
+,H10,tjjn blue light blocking glasses,8376
+,MW,efe computer glasses,8256
+,MW,blue-blocking glasses women,8229
+,H10,men computer glasses,8222
+,H10,blue lihgt blocking glasses women,8057
+,H10,annri blue light blocking computer glasses,7664
+,MW,ifhtech blue light blocking glasses women,7647
+,MW,simvey blue light blocking glasses women,7634
+,MW,blue lighr blocking glasses,7611
+,MW,blue-light blocking glasses 1.50,7587
+,MW,gaming computer glasses,7572
+,MW,eyekepper computer reading glasses,7462
+,H10,computer reading glasses women,7412
+,MW,ensarjoe blue light blocking glasses,7370
+,MW,1.0x computer glasses,7332
+,MW,biorhythm blue blocking glasses,7329
+,MW,everscroll computer glasses,7312
+,MW,meetsun blue light blocking glasses,7274
+,MW,computer glasses case,7250
+,MW,eyekepper blue light blocking glasses,7240
+,MW,attcl blue light blocking glasses,7224
+,MW,blue-blocking glasses men,7209
+,MW,kinovision blue light blocking glasses,7200
+,MW,0 computer glasses,7137
+,MW,hornettek computer glasses,7112
+,MW,buteo computer glasses,7044
+,MW,75 computer reading glasses,6968
+,MW,0.75 computer glasses,6917
+,MW,klim gaming glasses,6899
+,MW,eye strain computer glasses,6897
+,MW,cloudfield blue light blocking glasses,6821
+,MW,peekers computer glasses,6815
+,MW,glass computer desk,6814
+,MW,mens blue light blocking glasses,6778
+,MW,computer glasses for kids,6763
+,MW,northland outpost blue light blocking glasses,6755
+,MW,0.75 reading glasses for women blue light blocking,6643
+,MW,lihvo blue light blocking glasses,6564
+,MW,vr glasses game,6564
+,MW,computer glasses 1.25,6552
+,MW,50 computer glasses women,6520
+,MW,ubuji blue light blocking glasses,6480
+,MW,versol computer glasses,6362
+,MW,diff blue light blocking glasses women,6325
+,MW,gunner gaming glasses,6282
+,MW,quay computer glasses,6254
+,MW,glasses computer,6156
+,MW,75 computer glasses men,6103
+,MW,computer screen glasses,6092
+,MW,05 computer glasses,6075
+,MW,occffy blue light filter computer glasses,6034
+,MW,icu computer glasses,6031
+,MW,uv computer glasses for men,6019
+,MW,tijn computer glasses,5973
+,MW,gaming glasses women,5965
+,MW,mi computer glasses,5931
+,MW,lcec gaming glasses,5921
+,MW,video game glasses for men,5871
+,MW,g queen blue light blocking glasses,5864
+,MW,aqwano 4 pack computer reading glasses,5857
+,MW,75 reading glasses women blue light blocking,5800
+,MW,jos computer glasses,5788
+,MW,cat eye blue light blocking glasses,5754
+,MW,k kenzhou blue light blocking glasses,5733
+,MW,blueblocking computer glasses,5730
+,MW,wuay blue light blocking glasses,5723
+,MW,computer reading glasses men,5704
+,MW,glass games,5665
+,MW,azul stained glass board game,5650
+,MW,peakz blue light blocking glasses,5649
+,MW,gameking gaming glasses,5636
+,MW,1.5 computer reading glasses,5635
+,MW,eyezen computer glasses women,5606
+,MW,bo-toys drinking game glass roulette,5586
+,MW,games glasses,5568
+,MW,gaoye blue light blocking computer glasses,5537
+,MW,eosneik-us blue light blocking glasses,5486
+,MW,swanwick blue light blocking glasses,5469
+,MW,simvey computer glasses,5454
+,MW,prospek blue light blocking glasses,5443
+,MW,optiks computer glasses,5426
+,MW,thl sleep blue light blocking glasses,5417
+,MW,tv glasses blue light blocking,5415
+,MW,ensarjoe blue light blocking glasses for women,5414
+,MW,agstum blue light blocking glasses,5399
+,MW,klim computer glasses,5395
+,MW,gunnars computer glasses,5383
+,MW,j&s computer glasses,5377
+,MW,l blue light blocking glasses,5354
+,MW,gaming glasses for men,5312
+,MW,glass computer case,5305
+,MW,ifh tech blue light blocking glasses,5293
+,MW,blue light-blocking glasses,5268
+,MW,1.5x computer glasses,5253
+,MW,meetsun blue light blocking glasses women,5245
+,MW,non prescription blue light blocking glasses for women,5237
+,MW,glass computer monitor,5237
+,MW,1.00 computer glasses,5236
+,MW,cyrux computer glasses,5231
+,MW,gaming glass,5203
+,MW,untinted blue light blocking glasses,5199
+,MW,noscope gaming glasses,5186
+,MW,eyezen computer glasses men,5176
+,MW,lumderio blue light blocking glasses,5168
+,MW,2.25 computer glasses,5160
+,MW,eosneik blue light blocking glasses,5135
+,MW,game of thrones wine glass,5134
+,MW,ts computer glasses,5115
+,MW,ruvision anti-reflective computer reading glasses,5089
+,MW,mlg computer glasses,5080
+,MW,merstoclo blue light blocking computer glasses,5066
+,MW,bukos blue light blocking computer glasses,5048
+,MW,z-line belaire glass l-shaped computer desk,5034
+,MW,blue glasses for computer women,5021
+,MW,fit over blue light blocking glasses,5015
+,MW,techhero blue light blocking glasses,5004
