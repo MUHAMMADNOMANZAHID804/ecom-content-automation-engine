@@ -1,6 +1,8 @@
 """
 modules/review_analyzer.py
 ----------------------------
+# SYNC-CHECK: v3-SafeFPDF (search this exact string on GitHub to confirm
+# this file actually updated — if you don't see it, the push didn't take)
 All-platform tool. Input: pasted reviews (or ASIN-resolved reviews from Phase 1).
 Process: complaints, praises, gaps, sentiment.
 Output: structured insight data + downloadable PDF report.
