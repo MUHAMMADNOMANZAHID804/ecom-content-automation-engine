@@ -6,7 +6,7 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 import streamlit as st
 from core.manager import PipelineManager
-from tools.scrapper_mcp import Scrape
+from tools.scrapper_mcp import ScraperMCP
 """
 ui/app.py
 ---------
