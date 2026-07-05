@@ -22,7 +22,8 @@ from collections import Counter
 from typing import Any, Dict, List, Optional
 
 import pandas as pd
-#from fpdf import FPDF
+# FPDF imported for type-reference only — SafeFPDF (below) is what we actually instantiate
+from fpdf import FPDF
 
 from scripts.pdf_text_utils import sanitize_pdf_text, SafeFPDF
 
