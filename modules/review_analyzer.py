@@ -25,7 +25,13 @@ from typing import Any, Dict, List
 # FPDF imported for type-reference only — SafeFPDF (below) is what we actually instantiate
 from fpdf import FPDF
 
-from scripts.pdf_text_utils import sanitize_pdf_text, SafeFPDF
+try:
+    from scripts.pdf_text_utils import sanitize_pdf_text, SafeFPDF
+except ImportError:  # pragma: no cover
+    # FIX: same partial-deploy protection as competitor_analyzer.py — never
+    # let a missing SafeFPDF crash the entire app at import time.
+    from scripts.pdf_text_utils import sanitize_pdf_text
+    from fpdf import FPDF as SafeFPDF
 
 try:
     from pypdf import PdfReader
