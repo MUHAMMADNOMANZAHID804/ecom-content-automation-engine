@@ -40,6 +40,30 @@ _CHAR_REPLACEMENTS = {
 }
 
 
+# FIX: "Not enough horizontal space to render a single character" is a known
+# fpdf2 line-break bug (fpdf2 GitHub issue #1250): its word-wrap engine treats
+# any run of non-whitespace characters as a single unbreakable "word". If that
+# run is wider than the available cell/page width — a raw URL, a run-on
+# ASIN/SKU, a mangled title with no spaces, a long hyphen-less compound word —
+# fpdf2 crashes instead of just overflowing. Truncating text length doesn't
+# reliably prevent this (a 45-char unbroken token can already be wide enough
+# at 8-10pt fonts), so instead we guarantee a break point exists in any long
+# unbroken run by inserting a plain space every _MAX_UNBROKEN_RUN characters.
+# This is applied to ALL PDF text (every method in both analyzer modules
+# already routes through sanitize_pdf_text()), so it fixes the crash at its
+# single common choke point without touching any PDF layout/table code.
+_MAX_UNBROKEN_RUN = 25
+_LONG_RUN_RE = re.compile(r"\S{%d,}" % (_MAX_UNBROKEN_RUN + 1))
+
+
+def _break_long_runs(text: str, chunk: int = _MAX_UNBROKEN_RUN) -> str:
+    def _splitter(match: "re.Match") -> str:
+        run = match.group(0)
+        return " ".join(run[i:i + chunk] for i in range(0, len(run), chunk))
+
+    return _LONG_RUN_RE.sub(_splitter, text)
+
+
 def sanitize_pdf_text(text) -> str:
     """
     Makes any string safe to pass into FPDF's multi_cell/cell.
@@ -58,7 +82,7 @@ def sanitize_pdf_text(text) -> str:
 
     try:
         text.encode("latin-1")
-        return text
+        return _break_long_runs(text)
     except UnicodeEncodeError:
         pass
 
@@ -69,11 +93,12 @@ def sanitize_pdf_text(text) -> str:
 
     try:
         stripped.encode("latin-1")
-        return stripped
+        return _break_long_runs(stripped)
     except UnicodeEncodeError:
         # Final safety net: replace anything still unencodable with '?'
         # rather than crash. This should be rare after the steps above.
-        return stripped.encode("latin-1", errors="replace").decode("latin-1")
+        stripped = stripped.encode("latin-1", errors="replace").decode("latin-1")
+        return _break_long_runs(stripped)
 
 
 def sanitize_pdf_lines(lines) -> list:
