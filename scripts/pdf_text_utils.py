@@ -1,6 +1,8 @@
 """
 scripts/pdf_text_utils.py
 ----------------------------
+# SYNC-CHECK: v3-SafeFPDF (search this exact string on GitHub to confirm
+# this file actually updated — if you don't see it, the push didn't take)
 FPDF's core (built-in) fonts only support the Latin-1 character set. Real
 data WILL contain characters outside it — star symbols, curly quotes from
 LLM output, em-dashes, emoji in product titles, Euro signs, accented brand
