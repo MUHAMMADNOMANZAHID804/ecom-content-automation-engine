@@ -30,7 +30,6 @@ class ScraperMCP:
     def __init__(self, session: requests.Session = None):
         self.session = session or requests.Session()
         self.session.headers.update(DEFAULT_HEADERS)
-
     def fetch_product(self, asin: str) -> Dict:
         url = f"https://www.amazon.com/dp/{asin}"
         html = self._get(url)
@@ -77,3 +76,9 @@ class ScraperMCP:
         except requests.RequestException as e:
             logger.warning("Scrape request failed for %s: %s", url, e)
             return ""
+
+
+# Backward-compatible alias: an earlier/stale copy of this file or ui/app.py
+# in some deployments may reference "Scrape" instead of "ScraperMCP". This
+# prevents an ImportError regardless of which name is actually imported.
+Scrape = ScraperMCP
