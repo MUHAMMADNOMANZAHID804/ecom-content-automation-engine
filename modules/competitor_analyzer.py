@@ -24,7 +24,7 @@ from typing import Any, Dict, List, Optional
 import pandas as pd
 from fpdf import FPDF
 
-from scripts.pdf_text_utils import sanitize_pdf_text
+from scripts.pdf_text_utils import sanitize_pdf_text, SafeFPDF
 
 logger = logging.getLogger("competitor_analyzer")
 
@@ -438,7 +438,7 @@ class CompetitorAnalyzer:
                 pdf.cell(0, 7, fallback_line, border=1, ln=True)
 
     def _build_pdf_report_impl(self, gap_report: Dict[str, Any], brand: str = "") -> str:
-        pdf = FPDF()
+        pdf = SafeFPDF()
         pdf.add_page()
         pdf.set_font("Helvetica", "B", 16)
         pdf.cell(0, 10, "Competitor Analysis Report", ln=True)
@@ -580,7 +580,7 @@ class CompetitorAnalyzer:
         """Ultra-safe fallback: no tables, no fixed-width cells — just
         full-width multi_cell() text, which cannot trigger the same
         column-width failure mode as the table layout."""
-        pdf = FPDF()
+        pdf = SafeFPDF()
         pdf.add_page()
         pdf.set_font("Helvetica", "B", 16)
         pdf.cell(0, 10, "Competitor Analysis Report", ln=True)
