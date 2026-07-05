@@ -3,7 +3,7 @@
 # ║   Applies to ALL platforms — Governor Layer D               ║
 # ╚══════════════════════════════════════════════════════════════╝
 
-name: security_policy
+name: security-policy
 version: "1.0"
 applies_to: all_platforms
 
