@@ -12,6 +12,9 @@ ALL text through sanitize_pdf_text() before handing it to FPDF.
 import re
 import unicodedata
 
+from fpdf import FPDF
+from fpdf.errors import FPDFException
+
 # Explicit, human-readable replacements for characters that are common in
 # this project's data (ratings, LLM-generated copy, EU currency) but fall
 # outside Latin-1.
@@ -104,3 +107,65 @@ def sanitize_pdf_text(text) -> str:
 def sanitize_pdf_lines(lines) -> list:
     """Convenience helper for sanitizing a list of strings at once."""
     return [sanitize_pdf_text(line) for line in lines]
+
+
+class SafeFPDF(FPDF):
+    """
+    Drop-in replacement for fpdf.FPDF — use `SafeFPDF()` instead of `FPDF()`
+    and nothing else needs to change. Structurally cannot raise fpdf2's
+    "Not enough horizontal space to render a single character" (a known
+    line-break engine bug — fpdf2 GitHub issue #1250 — triggered by any
+    unbroken run of characters that's wider than the available cell width,
+    e.g. a URL, a long SKU, a mangled title). sanitize_pdf_text() already
+    prevents most cases by pre-breaking long runs, but font size and column
+    width vary across this report (16pt down to 8pt, 14mm up to full page),
+    so this is a backstop that guarantees multi_cell() can NEVER crash the
+    PDF, no matter what text or width it receives.
+
+    On failure, it retries at smaller font sizes, and if that's still not
+    enough, falls back to manually laying the text out one character at a
+    time using plain cell() calls — which has no internal word-wrap step
+    and therefore cannot trigger this bug. Original font is always restored.
+    """
+
+    def multi_cell(self, w=0, h=None, txt="", *args, **kwargs):
+        try:
+            return super().multi_cell(w, h, txt, *args, **kwargs)
+        except FPDFException:
+            pass
+
+        family, style, size = self.font_family, self.font_style, self.font_size_pt
+
+        # Attempt 1: shrink the font a few points and retry the normal path —
+        # cheapest fix, and keeps the real multi_cell layout/wrap behavior.
+        for smaller in range(int(size) - 1, 5, -1):
+            try:
+                self.set_font(family, style, smaller)
+                result = super().multi_cell(w, h, txt, *args, **kwargs)
+                self.set_font(family, style, size)
+                return result
+            except FPDFException:
+                continue
+
+        # Attempt 2: guaranteed-safe manual character-by-character layout.
+        # No word-wrap algorithm involved at all, so it cannot hit this bug.
+        self.set_font(family, style, size)
+        line_h = h or (size / 2.0)
+        usable_width = w if w and w > 0 else (self.w - self.r_margin - self.l_margin)
+        start_x = self.x
+        cur_width = 0.0
+        for ch in str(txt):
+            if ch == "\n":
+                self.ln(line_h)
+                self.set_x(start_x)
+                cur_width = 0.0
+                continue
+            ch_w = self.get_string_width(ch) or 0.1
+            if cur_width > 0 and cur_width + ch_w > usable_width:
+                self.ln(line_h)
+                self.set_x(start_x)
+                cur_width = 0.0
+            self.cell(ch_w, line_h, ch)
+            cur_width += ch_w
+        self.ln(line_h)
+        self.set_font(family, style, size)
