@@ -24,7 +24,7 @@ from typing import Any, Dict, List
 
 from fpdf import FPDF
 
-from scripts.pdf_text_utils import sanitize_pdf_text
+from scripts.pdf_text_utils import sanitize_pdf_text, SafeFPDF
 
 try:
     from pypdf import PdfReader
@@ -47,7 +47,7 @@ class ReviewAnalyzer:
     # Phase 3 support
     # ------------------------------------------------------------------
     def build_pdf_report(self, insights: Dict[str, Any], brand: str = "") -> str:
-        pdf = FPDF()
+        pdf = SafeFPDF()
         pdf.add_page()
         pdf.set_font("Helvetica", "B", 16)
         pdf.cell(0, 10, "Review Analysis Report", ln=True)
@@ -115,7 +115,7 @@ class ReviewAnalyzer:
 
         referee_verdict / risk_assessment are OPTIONAL (default None).
         """
-        pdf = FPDF()
+        pdf = SafeFPDF()
         pdf.add_page()
         pdf.set_font("Helvetica", "B", 16)
         pdf.cell(0, 10, "Listing Generator - Final Optimization Report", ln=True)
