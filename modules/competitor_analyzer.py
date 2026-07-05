@@ -1,6 +1,8 @@
 """
 modules/competitor_analyzer.py
 -------------------------------
+# SYNC-CHECK: v3-SafeFPDF (search this exact string on GitHub to confirm
+# this file actually updated — if you don't see it, the push didn't take)
 Amazon-only tool. Input: Jungle Scout CSV export.
 Process: rank by sales volume, extract titles + keywords, AND surface
 star-rating signals (which competitors customers actually like, and what
