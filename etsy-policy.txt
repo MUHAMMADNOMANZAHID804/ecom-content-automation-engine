@@ -1,0 +1,87 @@
+ETSY LISTING POLICY & OPTIMIZATION GUIDE — Knowledge Base v4.0
+Source: Official Etsy Advertising & Seller Policy Documentation
+
+=== TITLE BEST PRACTICES (CRITICAL FOR ADVERTISING) ===
+Keep titles short and sweet — ideally 40 characters or less for advertising compliance.
+Brief, clear listing titles are preferable over a long, confusing jumble of keywords.
+Lead with your most relevant keywords (front-load).
+Example GOOD: "Women's Red Silk Floral Blouse" (30 chars — ad compliant)
+Example BAD: "Women's blouse, red blouse, floral blouse, silk blouse, women's clothing, gift"
+Avoid ALL UPPERCASE letters in titles.
+Title and thumbnail photo must accurately describe the item including all variations.
+Shoppers who click an ad and find it doesn't match expectations = lost trust.
+
+=== CHARACTER LIMITS ===
+TITLE: 140 characters maximum (ideal: 40 characters for advertising compliance)
+DESCRIPTION: 15,000 characters maximum
+TAGS: Exactly 13 tags, each maximum 20 characters
+
+=== PHOTO REQUIREMENTS (ADVERTISING COMPLIANCE) ===
+Most advertising platforms (Google, Pinterest, Facebook, Instagram) prohibit:
+- Watermarks or other promotional text on images
+- Cluttered backgrounds or added borders that distract from the item
+Product must be the STAR of the image, not your logo.
+First image MUST show the actual physical item the buyer will receive — not a rendering or stock photo.
+For personalized/custom items (monogrammed, engraved): first image must show a FINISHED customized item, not blank product or placeholder text like "Your Text Here".
+
+=== CREATIVITY STANDARDS — FOUR SELLER CATEGORIES (MUST ACCURATELY REPRESENT) ===
+1. MADE BY A SELLER: Physical items crafted, altered, or assembled by a seller, by hand or using tools they own (3D printer, Cricut machine)
+2. DESIGNED BY A SELLER: Original designs by a seller (or seller-prompted AI art) offered as digital download or produced/printed by a third-party
+3. SOURCED BY A SELLER: Items that enable buyer creativity — craft supplies, party decorations, print-on-demand items
+4. HANDPICKED BY A SELLER: Vintage items (20+ years old), items from nature, curated collections
+
+Buyers see how your item is categorized in the listing — accuracy is mandatory.
+
+=== PRODUCTION PARTNER RULES ===
+A production partner is a third party who helps turn your original designs into physical products.
+Must disclose production partners on any applicable listings.
+Qualifying production partners: print-on-demand services, cut-and-sew manufacturers, contract manufacturers, specialized production services.
+NOT qualifying as production partners: yourself, shop members, pets, materials suppliers, limited assistance providers (workshop that fired your ceramic mug = not a production partner).
+Maintain complete shop About section: list all shop members, outside production partners, recent photos of creative process and workspace.
+
+=== PROHIBITED ITEMS (8 CATEGORIES) ===
+1. Alcohol, Tobacco, Drugs, Drug Paraphernalia, Medical Drugs and Devices, Items making Medical Claims
+2. Animal Products and Human Body Parts and Fluids
+3. Dangerous Items: Hazardous Materials and Devices, Recalled Items, Weapons
+4. Hate Items: Items that Promote, Support, or Glorify Hatred
+5. Illegal Items, Items Promoting Illegal Activity, and Highly Regulated Items
+6. Internationally Regulated Items
+7. Nudity and Sexual Content
+8. Violent Items: Items that Promote, Support, or Glorify Violence
+
+=== PROHIBITED PRACTICES ===
+Listing mass-produced items as handmade
+Listing items as "vintage" if less than 20 years old
+Using trademark/brand names you don't own
+Using digital mock ups instead of actual product photography as first image
+Inaccurate categorization of seller role
+
+=== TAG RULES (13 TAGS EXACTLY) ===
+Use ALL 13 tags — blank tags waste search visibility.
+Multi-word tags preferred (how buyers actually search).
+Use buyer language, not seller/industry jargon.
+No competitor brand names.
+Tag strategy: 4 product type tags + 3 use-case tags + 3 material tags + 2 occasion/audience tags = 13 total.
+Tags are NOT visible to buyers — purely for search algorithm.
+
+=== DESCRIPTION STRUCTURE (STORY-DRIVEN) ===
+1. Emotional opening hook — connects with buyer identity
+2. Accurate product description including all variations offered
+3. Materials, dimensions, weight
+4. Personalization options (if applicable)
+5. Production time + shipping note
+6. Care instructions
+
+=== ADVERTISING COMPLIANCE (GOOGLE, PINTEREST, FACEBOOK, INSTAGRAM) ===
+Most ad platforms have strict policies about what can be promoted.
+Remove any items that violate Etsy's policies before advertising.
+Prohibited items cannot be advertised on external platforms.
+Intellectual property violations will be flagged by ad platforms.
+Accurate item descriptions are required — no misleading titles.
+
+=== HIGH-PERFORMING ETSY PATTERNS ===
+Short emotional title (40 chars) + front-loaded keyword = best ad performance
+All 13 tags used = maximum Etsy search visibility
+Story-first description builds buyer connection and brand trust
+Accurate first photo (actual item, not mockup) = higher conversion + fewer returns
+Production partner disclosure = builds trust, prevents policy flags

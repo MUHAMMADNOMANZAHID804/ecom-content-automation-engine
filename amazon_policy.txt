@@ -1,0 +1,35 @@
+{
+  "_meta": {
+    "description": "Amazon top competitor listings — paste real listing data here",
+    "usage": "Research Agent reads this in Phase 1 for gap analysis",
+    "how_to_use": "Copy a top competitor's listing into the 'listings' array below",
+    "path": "knowledge_base/raw_data/amazon_top_listings.json"
+  },
+
+  "listings": [
+    {
+      "_instructions": "DELETE THIS ENTRY — Replace with real competitor data",
+      "asin": "PASTE_ASIN_HERE",
+      "title": "Paste competitor title here",
+      "bullets": [
+        "Paste bullet 1 here",
+        "Paste bullet 2 here",
+        "Paste bullet 3 here",
+        "Paste bullet 4 here",
+        "Paste bullet 5 here"
+      ],
+      "description": "Paste competitor description here",
+      "rating": "4.5 out of 5 stars",
+      "review_count": "1,234 ratings",
+      "top_reviews": [
+        {"rating": "5", "text": "Paste a top positive review here"},
+        {"rating": "1", "text": "Paste a top critical review here — most useful for gap analysis"},
+        {"rating": "3", "text": "Paste a middle review that mentions specific issues"}
+      ],
+      "category": "Your product category",
+      "source": "manual_json_paste"
+    }
+  ],
+
+  "_usage_note": "Paste up to 5 competitor listings. The Research Agent will analyze title keywords, bullet gaps, and review themes to build a gap report for your listing."
+}

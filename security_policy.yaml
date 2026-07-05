@@ -1,0 +1,70 @@
+# ╔══════════════════════════════════════════════════════════════╗
+# ║   SECURITY POLICY — spec/security_policy.yaml               ║
+# ║   Applies to ALL platforms — Governor Layer D               ║
+# ╚══════════════════════════════════════════════════════════════╝
+
+name: security_policy
+version: "1.0"
+applies_to: all_platforms
+
+# These patterns trigger HARD_FAIL in governor Layer D
+credential_patterns:
+  - pattern: "sk-[a-zA-Z0-9]{20,}"
+    type: api_key_openai
+  - pattern: "gsk_[a-zA-Z0-9]{50,}"
+    type: api_key_groq
+  - pattern: "AKIA[A-Z0-9]{16}"
+    type: aws_access_key
+  - pattern: "ghp_[a-zA-Z0-9]{36}"
+    type: github_token
+  - pattern: "Bearer [a-zA-Z0-9]{20,}"
+    type: bearer_token
+  - pattern: "(postgresql|mongodb|mysql|redis)://"
+    type: database_connection_string
+
+pii_patterns:
+  - pattern: "[a-zA-Z0-9._%+\\-]+@[a-zA-Z0-9.\\-]+\\.[a-zA-Z]{2,}"
+    type: email_address
+  - pattern: "\\+?[0-9]{10,13}"
+    type: phone_number
+
+internal_path_patterns:
+  - "/home/"
+  - "/mnt/"
+  - "/var/"
+  - "C:\\"
+  - "D:\\"
+
+rag_metadata_keys:
+  - "chunk_id"
+  - "doc_id"
+  - "faiss_id"
+  - "vector_id"
+  - "embedding"
+  - "page_num"
+  # Global cross-platform policy — applies before any platform-specific spec.
+# Loaded by core/safety_governor.py
+
+banned_words:
+  - cure
+  - guaranteed
+  - fda approved
+  - clinically proven
+  - miracle
+  - risk-free
+  - 100% safe
+  - prevents disease
+  - treats
+
+max_all_caps_word_ratio: 0.30   # fraction of ALL-CAPS words allowed anywhere in copy
+
+pii_redaction:
+  enabled: true
+  patterns:
+    - email
+    - phone_number
+    - street_address
+
+required_disclosures:
+  supplements: "This statement has not been evaluated by the FDA."
+  electronics: "See manufacturer warranty terms for coverage details."

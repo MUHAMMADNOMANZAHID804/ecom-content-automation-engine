@@ -1,0 +1,78 @@
+"""
+╔══════════════════════════════════════════════════════════════════════╗
+║          SECURE MCP GATEWAY — tools/secure_mcp_gateway.py           ║
+║     Runtime Firewall: validates all tool calls before execution     ║
+╚══════════════════════════════════════════════════════════════════════╝
+
+Podcast Principles:
+  - Model Armor / Guard Station for MCP calls (Podcast 2)
+  - Runtime LLM Firewalls on every tool-call boundary (Podcast 4)
+  - Allow-listing: only trusted tools allowed (Podcast 4)
+  - Confused Deputy prevention: agents can't inherit broad permissions (Podcast 4)
+"""
+
+import logging
+import re
+
+log = logging.getLogger("secure_gateway")
+
+# ── Allow-listed tools only (Podcast 4 — Slop-Squatting defense) ──────
+ALLOWED_TOOLS = {
+    "scraper_mcp" : ["collect"],
+    "file_mcp"    : ["read_json", "write_json", "read_text", "write_text", "exists"],
+}
+
+# ── Dangerous patterns to block in any tool argument ──────────────────
+BLOCKED_ARG_PATTERNS = [
+    r"__import__",
+    r"os\.system",
+    r"subprocess",
+    r"eval\(",
+    r"exec\(",
+    r"open\(/etc",
+    r"\.\.\/",        # path traversal
+    r"drop table",    # SQL injection
+    r"delete from",
+]
+
+
+class SecureMCPGateway:
+    """
+    Guard Station for all MCP tool calls.
+    No tool call passes through without validation.
+    """
+
+    def validate(self, tool_name: str, method: str, args: dict) -> dict:
+        """
+        Validate a tool call before execution.
+        Returns: {"allowed": bool, "reason": str}
+        """
+        # 1. Allow-list check
+        if tool_name not in ALLOWED_TOOLS:
+            log.warning(f"BLOCKED: Unknown tool '{tool_name}'")
+            return {"allowed": False,
+                    "reason": f"Tool '{tool_name}' is not in the allow-list"}
+
+        if method not in ALLOWED_TOOLS[tool_name]:
+            log.warning(f"BLOCKED: Method '{method}' not allowed for '{tool_name}'")
+            return {"allowed": False,
+                    "reason": f"Method '{method}' not allowed for tool '{tool_name}'"}
+
+        # 2. Argument content scan
+        args_str = str(args).lower()
+        for pattern in BLOCKED_ARG_PATTERNS:
+            if re.search(pattern, args_str, re.IGNORECASE):
+                log.warning(f"BLOCKED: Dangerous pattern in args: {pattern}")
+                return {"allowed": False,
+                        "reason": f"Argument contains blocked pattern: '{pattern}'"}
+
+        log.info(f"GATEWAY PASS  tool={tool_name}  method={method}")
+        return {"allowed": True, "reason": "Validated"}
+
+    def audit_log(self, tool_name: str, method: str,
+                  args: dict, result_size: int):
+        """Log all tool executions for telemetry (Podcast 4 — AI-Driven SOC)."""
+        log.info(
+            f"TOOL EXEC  tool={tool_name}  method={method}  "
+            f"args_keys={list(args.keys())}  result_size={result_size}"
+        )

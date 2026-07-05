@@ -1,0 +1,32 @@
+platform: amazon
+
+title:
+  max_length: 200
+  min_length: 185
+  banned_in_title:
+    - "best seller"
+    - "#1"
+    - free shipping
+
+bullets:
+  count: 5
+  min_length: 300
+  max_length: 350
+
+description:
+  min_length: 1700
+  max_length: 1800
+  brand_name_allowed: false
+
+banned_words:
+  - best seller
+  - amazon's choice
+  - sponsored
+
+banned_claims:
+  - clinically proven
+  - doctor recommended
+  - fda approved
+
+max_brand_length: 50
+max_all_caps_word_ratio: 0.25
