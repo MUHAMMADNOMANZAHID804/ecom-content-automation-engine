@@ -1,23 +1,3 @@
-import sys
-import os
-
-# --- FIX: Streamlit Cloud has no real TTY, so libraries that use `rich`
-# (directly or via a dependency, e.g. the Groq SDK's error/log rendering)
-# can fail to auto-detect terminal width and get back 0, which makes rich
-# throw "Not enough horizontal space to render a single character."
-# Forcing COLUMNS/LINES here fixes it at the environment level, before any
-# backend module is imported. Backend logic is completely untouched.
-os.environ.setdefault("COLUMNS", "200")
-os.environ.setdefault("LINES", "50")
-os.environ.setdefault("TERM", "xterm-256color")
-os.environ.setdefault("FORCE_COLOR", "0")
-
-# Yeh line Python ko batayegi ke root folder ko bhi check kare
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
-
-import streamlit as st
-from core.manager import PipelineManager
-from tools.scrapper_mcp import ScraperMCP
 """
 ui/app.py
 ---------
@@ -597,18 +577,6 @@ def listing_generator_tool(manager: PipelineManager, state: PipelineState) -> No
             "one pass (not a summary)."
         )
 
-        # Brand/Features live ONLY here now — per your feedback, they weren't
-        # useful on the Competitor Analyzer / Review Analyzer tabs.
-        col1, col2 = st.columns([1, 2])
-        with col1:
-            state.brand = st.text_input("Brand name", state.brand, placeholder="e.g. Acme")
-        with col2:
-            state.features = st.text_area(
-                "Product features (GSM, certifications, dimensions, etc.)",
-                state.features, height=68,
-                placeholder="e.g. 100% organic cotton, 220 GSM, OEKO-TEX certified, true-to-size XS-4XL",
-            )
-
         has_autoadd_data = bool(state.gap_report or state.review_report)
         if has_autoadd_data:
             st.success(
@@ -634,44 +602,75 @@ def listing_generator_tool(manager: PipelineManager, state: PipelineState) -> No
                 paths.append(p)
             state.uploaded_report_paths = paths
 
-        state.competitor_data_manual = st.text_area(
-            "Competitor Data (Titles + Negative Reviews) — optional manual input",
-            state.competitor_data_manual or "",
-            height=140,
-            help="Paste competitor titles and their negative reviews directly here. "
-                 "Useful on Etsy/Shopify (no CSV analyzer), or to add extra context "
-                 "on top of whatever Auto-Add already carried over.",
-            placeholder=(
-                "Competitor 1: Hanes Beefy-T Short Sleeve Crew\n"
-                "Keywords: Short Sleeve, Crew Neck, Cotton T-Shirt, Classic Fit\n"
-                "Negative: Shrinks 2 sizes after first wash. Colors fade fast.\n\n"
-                "Competitor 2: Gildan Heavy Cotton Adult T-Shirt\n"
-                "Keywords: Heavy Cotton, Adult T-Shirt, Classic Fit, Unisex\n"
-                "Negative: Stiff uncomfortable fabric. Sizing inconsistent."
-            ),
-        )
+        # FIX: everything below used to be plain widgets outside a form —
+        # each one committed (and could trigger a rerun) the instant you
+        # clicked away, and if a paste never got a blur/Ctrl+Enter event
+        # (e.g. Alt-Tabbing straight to another browser tab to copy
+        # competitor 2's info), that unsaved edit could be lost on the next
+        # rerun. Wrapping everything in st.form() defers ALL of this until
+        # you click "Generate" — nothing commits or reruns until then, so
+        # switching tabs mid-paste can no longer lose data.
+        with st.form("listing_generator_form"):
+            col1, col2 = st.columns([1, 2])
+            with col1:
+                brand_input = st.text_input("Brand name", state.brand, placeholder="e.g. Acme")
+            with col2:
+                features_input = st.text_area(
+                    "Product features (GSM, certifications, dimensions, etc.)",
+                    state.features, height=68,
+                    placeholder="e.g. 100% organic cotton, 220 GSM, OEKO-TEX certified, true-to-size XS-4XL",
+                )
 
-        col_a, col_b = st.columns(2)
-        with col_a:
-            state.creativity = st.slider(
-                "Creativity", 0.0, 1.0, state.creativity, 0.01,
-                help="Lower = safer, more literal to your inputs. Higher = more "
-                     "varied, higher-energy phrasing."
+            competitor_data_input = st.text_area(
+                "Competitor Data (Titles + Negative Reviews) — optional manual input",
+                state.competitor_data_manual or "",
+                height=220,  # taller — less scrolling, less chance of thinking data vanished
+                help="Paste competitor titles and their negative reviews directly here. "
+                     "Useful on Etsy/Shopify (no CSV analyzer), or to add extra context "
+                     "on top of whatever Auto-Add already carried over. Nothing is sent "
+                     "until you click Generate below, so it's safe to paste multiple "
+                     "competitors in one go, switch tabs, and come back.",
+                placeholder=(
+                    "Competitor 1: Hanes Beefy-T Short Sleeve Crew\n"
+                    "Keywords: Short Sleeve, Crew Neck, Cotton T-Shirt, Classic Fit\n"
+                    "Negative: Shrinks 2 sizes after first wash. Colors fade fast.\n\n"
+                    "Competitor 2: Gildan Heavy Cotton Adult T-Shirt\n"
+                    "Keywords: Heavy Cotton, Adult T-Shirt, Classic Fit, Unisex\n"
+                    "Negative: Stiff uncomfortable fabric. Sizing inconsistent."
+                ),
             )
-        with col_b:
-            state.auto_fix_enabled = st.toggle(
-                "Auto-fix violations", value=state.auto_fix_enabled,
-                help="If a section falls outside the platform's required "
-                     "character range, automatically rewrite just that section "
-                     "(up to 2 retries). Turn off to see the raw, unfixed output."
-            )
 
-        tip("Keep Auto-fix ON for your first run — it silently corrects any "
-            "section that falls outside this platform's character limits "
-            "before you ever see it. Generation is single-shot now (one final "
-            "listing, not drafts) to keep token usage minimal.")
+            col_a, col_b = st.columns(2)
+            with col_a:
+                creativity_input = st.slider(
+                    "Creativity", 0.0, 1.0, state.creativity, 0.01,
+                    help="Lower = safer, more literal to your inputs. Higher = more "
+                         "varied, higher-energy phrasing."
+                )
+            with col_b:
+                auto_fix_input = st.toggle(
+                    "Auto-fix violations", value=state.auto_fix_enabled,
+                    help="If a section falls outside the platform's required "
+                         "character range, automatically rewrite just that section "
+                         "(up to 2 retries). Turn off to see the raw, unfixed output."
+                )
 
-        if st.button("Generate Full Listing + PDF Report", type="primary"):
+            tip("Keep Auto-fix ON for your first run — it silently corrects any "
+                "section that falls outside this platform's character limits "
+                "before you ever see it. Generation is single-shot now (one final "
+                "listing, not drafts) to keep token usage minimal. Nothing above "
+                "is sent until you click this button.")
+
+            submitted = st.form_submit_button("Generate Full Listing + PDF Report", type="primary")
+
+        if submitted:
+            # Commit all the form's values into state NOW, only on submit.
+            state.brand = brand_input
+            state.features = features_input
+            state.competitor_data_manual = competitor_data_input
+            state.creativity = creativity_input
+            state.auto_fix_enabled = auto_fix_input
+
             try:
                 with st.spinner("Running phases 4-8: RAG \u2192 keywords \u2192 generate "
                                  "\u2192 audit \u2192 final PDF..."):
@@ -723,10 +722,19 @@ def listing_generator_tool(manager: PipelineManager, state: PipelineState) -> No
                         st.download_button("Download Final Optimization Report (PDF)", f,
                                             file_name="listing_summary.pdf")
             except Exception as e:  # noqa: BLE001
-                st.error(
-                    f"Listing generation failed: {e}\n\n"
+                # FIX: this is now a FULL, persistent, impossible-to-miss error
+                # display — includes the exception type and a full traceback in
+                # an expander, so "it just doesn't work" always shows the real
+                # reason next time instead of failing silently or scrolling
+                # out of view.
+                import traceback
+                st.error(f"**Listing generation failed:** {type(e).__name__}: {e}")
+                with st.expander("Full error details (for debugging)"):
+                    st.code(traceback.format_exc())
+                st.info(
                     "If this mentions token budget or empty output, see "
-                    "core/subagents.py's LISTING_MAX_TOKENS setting."
+                    "core/subagents.py's LISTING_MAX_TOKENS setting. If it's "
+                    "something else, copy the full error details above."
                 )
 
 
