@@ -6,7 +6,7 @@ Streamlit dashboard for the multi-tool e-commerce listing platform.
 THIS FILE IS PRESENTATION-ONLY. Every call into core/manager.py, every
 PipelineState field, and every render_*() function's logic is IDENTICAL to
 the previous version — only layout, navigation, and styling changed to match
-the "Anti-Gravity 2.0" reference design (dark theme, pill platform switch,
+the original reference design (dark theme, pill platform switch,
 vertical phase-nav, System Status card, styled upload dropzone, gradient CTA
 buttons). No manager method signatures, no business logic, was touched.
 
@@ -31,7 +31,7 @@ from core.manager import PipelineManager, PipelineState
 from tools.scrapper_mcp import ScraperMCP  # existing tool, untouched
 
 st.set_page_config(
-    page_title="Anti-Gravity 2.0 — Listing Studio",
+    page_title="ListForge — AI Listing Studio",
     layout="wide",
     initial_sidebar_state="expanded",
 )
@@ -56,7 +56,7 @@ TOOL_META = {
 
 
 # ---------------------------------------------------------------------------
-# THEME — dark, card-based, matching the Anti-Gravity 2.0 reference design.
+# THEME — dark, card-based, ListForge branding.
 # Pure CSS/visual layer. No logic lives here.
 # ---------------------------------------------------------------------------
 def inject_theme() -> None:
@@ -283,8 +283,8 @@ def render_header(state: PipelineState) -> None:
     with col_logo:
         st.markdown(
             '<div class="ag-header-row">'
-            '<span class="ag-logo-badge">AG</span>'
-            '<span class="ag-title">ANTI-GRAVITY <span class="ag-title-version">v2.0</span></span>'
+            '<span class="ag-logo-badge">LF</span>'
+            '<span class="ag-title">ListForge <span class="ag-title-version">AI Studio</span></span>'
             '</div>',
             unsafe_allow_html=True,
         )
@@ -308,6 +308,7 @@ def render_header(state: PipelineState) -> None:
             '<span class="ag-status-dot"></span>Pipeline Active</div>',
             unsafe_allow_html=True,
         )
+    st.caption("Precision listings, built on data — not guesswork.")
     st.write("")
 
 
@@ -374,9 +375,9 @@ def render_sidebar_nav(state: PipelineState) -> str:
             st.checkbox(label, value=matched, disabled=True, key=f"progress_{key}")
 
         st.caption(
-            "Auto-Add is the system's built-in advantage: when it's on, results "
-            "from Competitor Analyzer / Review Analyzer are carried forward "
-            "automatically as extra context for the Listing Generator."
+            "💡 Auto-Add is your shortcut: switch it on and every insight from "
+            "Competitor Analyzer and Review Analyzer flows straight into your "
+            "next listing — no copy-pasting required."
         )
 
     return st.session_state.active_tool
@@ -388,7 +389,7 @@ def render_sidebar_nav(state: PipelineState) -> str:
 # ---------------------------------------------------------------------------
 def render_competitor_table(rows: list, caption: str) -> None:
     if not rows:
-        st.info("No competitor rows to show.")
+        st.info("Upload a CSV above to see your competitive landscape here.")
         return
     st.write(f"**{caption}**")
     table_rows = []
@@ -406,7 +407,7 @@ def render_competitor_table(rows: list, caption: str) -> None:
 
 def render_gap_report(gap_report: dict) -> None:
     if not gap_report:
-        st.info("No competitor gap data yet.")
+        st.info("Run an analysis above and your competitor market matrix will appear here.")
         return
 
     st.markdown("#### Phase 1: Top 5 Competitors Market Matrix")
@@ -445,7 +446,7 @@ def render_gap_report(gap_report: dict) -> None:
 
 def render_review_insights(insights: dict) -> None:
     if not insights:
-        st.info("No review analysis yet.")
+        st.info("Paste reviews above and your customer insight report will appear here.")
         return
     score = insights.get("sentiment_score", 0.0)
     st.metric("Overall Sentiment", f"{score:.2f}", help="-1 (very negative) to 1 (very positive)")
@@ -505,7 +506,7 @@ def competitor_analyzer_tool(manager: PipelineManager, state: PipelineState) -> 
                 with st.spinner("Finding your top 5 competitors..."):
                     updated = manager.phase2_competitor_analysis(state)
                 st.session_state.pipeline_state = updated
-                st.success("Competitor analysis complete.")
+                st.success("Analysis complete — here's what the market is telling you.")
                 render_gap_report(updated.gap_report)
                 if updated.pdf_paths.get("competitor_report"):
                     with open(updated.pdf_paths["competitor_report"], "rb") as f:
@@ -555,7 +556,7 @@ def review_analyzer_tool(manager: PipelineManager, state: PipelineState) -> None
                         state = manager.phase1_ingest(state)
                     state = manager.phase3_review_analysis(state)
                 st.session_state.pipeline_state = state
-                st.success("Review analysis complete.")
+                st.success("Analysis complete — here's what your customers are really saying.")
                 render_review_insights(state.review_report)
                 if state.pdf_paths.get("review_report"):
                     with open(state.pdf_paths["review_report"], "rb") as f:
@@ -679,7 +680,7 @@ def listing_generator_tool(manager: PipelineManager, state: PipelineState) -> No
                     else:
                         state = manager.run_full_pipeline(state)
                 st.session_state.pipeline_state = state
-                st.success("Listing generated.")
+                st.success("Your listing is ready — reviewed and audited below.")
 
                 st.write("**Final Listing**")
                 st.text_area("Final Listing", state.final_listing, height=350,
@@ -721,6 +722,10 @@ def listing_generator_tool(manager: PipelineManager, state: PipelineState) -> No
                     with open(state.pdf_paths["listing_summary"], "rb") as f:
                         st.download_button("Download Final Optimization Report (PDF)", f,
                                             file_name="listing_summary.pdf")
+                    st.caption(
+                        "✨ One more pass never hurts — read it once with fresh eyes "
+                        "before it goes live."
+                    )
             except Exception as e:  # noqa: BLE001
                 # FIX: this is now a FULL, persistent, impossible-to-miss error
                 # display — includes the exception type and a full traceback in
