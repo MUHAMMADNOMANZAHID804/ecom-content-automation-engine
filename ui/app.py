@@ -23,7 +23,34 @@ Layout:
 """
 
 import os
+import sys
 import tempfile
+
+# ---------------------------------------------------------------------------
+# PERMANENT FIX for "ModuleNotFoundError: No module named 'core'" after a
+# Streamlit Community Cloud sleep/reboot cycle.
+#
+# Root cause: Streamlit Cloud apps sleep after inactivity. When someone
+# visits again, it does a FULL REBOOT — fresh git clone, fresh dependency
+# install, fresh Python process — not just "waking up" a cached one. That
+# fresh process's working directory / sys.path can differ subtly from
+# whatever state made the ORIGINAL deploy work, especially since
+# `streamlit run ui/app.py` makes Python add ui/'s own directory to
+# sys.path, not necessarily the repo root above it. This is why it worked
+# perfectly right after submission (running on the original, already-
+# initialized process) and then broke days later on the first fresh reboot
+# — nothing in the code changed, the environment rebuild exposed a path
+# assumption that was never actually guaranteed.
+#
+# Fix: explicitly compute the project root (one directory above this file's
+# own folder) and insert it at the FRONT of sys.path before any project
+# import runs. This makes `from core.manager import ...` etc. resolve
+# correctly regardless of what directory Streamlit's process happens to be
+# launched from — on this deploy, the next reboot, or any future one.
+# ---------------------------------------------------------------------------
+_PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+if _PROJECT_ROOT not in sys.path:
+    sys.path.insert(0, _PROJECT_ROOT)
 
 import streamlit as st
 
