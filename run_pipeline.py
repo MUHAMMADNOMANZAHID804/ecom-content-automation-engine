@@ -15,7 +15,14 @@ Usage:
 
 import argparse
 import logging
+import os
 import sys
+
+# Same defensive fix as ui/app.py — ensures project-root imports resolve
+# correctly regardless of the directory this script is invoked from.
+_PROJECT_ROOT = os.path.dirname(os.path.abspath(__file__))
+if _PROJECT_ROOT not in sys.path:
+    sys.path.insert(0, _PROJECT_ROOT)
 
 from core.manager import PipelineManager, PipelineState
 from scripts.build_kb import KBClient
