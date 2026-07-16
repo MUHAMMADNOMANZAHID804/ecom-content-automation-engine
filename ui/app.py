@@ -363,7 +363,7 @@ def render_sidebar_nav(state: PipelineState) -> str:
             else:
                 st.markdown('<div class="ag-nav-inactive-wrap">', unsafe_allow_html=True)
                 if st.button(f'{meta["icon"]}  {meta["phase"]}: {meta["label"]}',
-                             key=f"nav_{tool}", use_container_width=True):
+                             key=f"nav_{tool}", width='stretch'):
                     st.session_state.active_tool = tool
                     st.rerun()
                 st.markdown('</div>', unsafe_allow_html=True)
@@ -387,6 +387,28 @@ def render_sidebar_nav(state: PipelineState) -> str:
             + '</div>'
         )
         st.markdown(status_html, unsafe_allow_html=True)
+
+        # --- NEW: Model Routing panel ---
+        # Reads DIRECTLY from core/subagents.py's live constants (not a
+        # cached/remembered value), so whatever is shown here is guaranteed
+        # to match what the app is ACTUALLY using right now — this is the
+        # permanent answer to "how do I know if the models updated?"
+        # Works whether the value came from a code default, a local .env,
+        # or a Streamlit Cloud secret.
+        try:
+            from core import subagents as _subagents_mod
+            with st.expander("🔧 Active Models", expanded=False):
+                st.caption("Live values read from core/subagents.py — always accurate.")
+                st.code(
+                    f"Manager (judgment):     {_subagents_mod.MANAGER_MODEL}\n"
+                    f"Listing/Competitor:     {_subagents_mod.LISTING_DATA_MODEL}\n"
+                    f"Fast (structured):      {_subagents_mod.SUBAGENT_MODEL_FAST}\n"
+                    f"Reasoning (sentiment):  {_subagents_mod.SUBAGENT_MODEL_REASONING}\n"
+                    f"Retrieval (keywords):   {_subagents_mod.SUBAGENT_MODEL_RETRIEVAL}",
+                    language=None,
+                )
+        except Exception as e:  # noqa: BLE001
+            st.caption(f"Could not read active model routing: {e}")
 
         st.divider()
         st.markdown('<div class="ag-nav-heading">Pipeline Progress</div>', unsafe_allow_html=True)
@@ -429,7 +451,7 @@ def render_competitor_table(rows: list, caption: str) -> None:
             "Star Rating": f"{c['star_rating']:.1f}" if c.get("star_rating") else "N/A",
             "Title": c.get("title", "")[:90],
         })
-    st.dataframe(table_rows, use_container_width=True, hide_index=True)
+    st.dataframe(table_rows, width='stretch', hide_index=True)
 
 
 def render_gap_report(gap_report: dict) -> None:
