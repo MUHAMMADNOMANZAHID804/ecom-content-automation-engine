@@ -404,26 +404,27 @@ class CompetitorAnalyzer:
         Sold, Star Rating, Keywords — matching a proper market-matrix layout
         instead of a flat bullet list.
 
-        FIX: "Not enough horizontal space to render a single character" —
-        an fpdf2 exception seen on Streamlit Cloud (different fpdf2 version
-        than local) when column widths sum too close to the page's usable
-        width, or a cell value is empty/oddly formatted. Column widths now
-        total 165mm (comfortable margin under A4's ~190mm usable width,
-        instead of the old 190mm which left zero room for error), every
-        cell value has a non-empty fallback, and the whole per-row render
-        is wrapped so a single bad row can't take down the entire PDF —
-        it falls back to a plain-text line for that row instead.
+        FIX v2: production logs showed the SafeFPDF fallback (cell -> retry
+        smaller font -> placeholder) firing repeatedly across MANY cells, not
+        just rare edge cases — meaning normal values like "$24.99" or "4.8"
+        were tripping fpdf2's "Not enough horizontal space" check at 8pt in
+        narrow columns on the deployed fpdf2 version. Fixed at the SOURCE
+        this time: font dropped to 7pt (proactively, not just as a reactive
+        retry) and column widths rebalanced to give the tightest columns
+        (ASIN, Rating) more breathing room. This should mean SafeFPDF's
+        retry/placeholder path rarely if ever triggers now — it remains in
+        place underneath as a safety net, but prevention beats fallback.
         """
-        col_widths = [20, 20, 16, 22, 14, 73]  # mm, sums to 165 (safe margin under ~190mm usable)
+        col_widths = [24, 18, 16, 20, 14, 73]  # mm, sums to 165 (safe margin under ~190mm usable)
         headers = ["ASIN", "Brand", "Price", "Monthly Sold", "Rating", "Title Keywords"]
 
-        pdf.set_font("Helvetica", "B", 8)
+        pdf.set_font("Helvetica", "B", 7)
         pdf.set_fill_color(230, 230, 230)
         for w, h in zip(col_widths, headers):
             pdf.cell(w, 7, h, border=1, fill=True)
         pdf.ln()
 
-        pdf.set_font("Helvetica", "", 8)
+        pdf.set_font("Helvetica", "", 7)
         for c in rows:
             try:
                 title_kws = ", ".join(self.extract_keywords([c.get("title", "")], top_n=4))
