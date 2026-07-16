@@ -51,30 +51,55 @@ logger = logging.getLogger("subagents")
 #                         Brutal Risk Assessment, and the competitive-advantage
 #                         summary. This is the "fast big main manager" role.
 #
-#   LISTING_DATA_MODEL   meta-llama/llama-4-scout-17b-16e-instruct — highest
-#                         TPM of any candidate (300K on Developer plan), 750
-#                         t/s, 131K context. Used for the two jobs that need
-#                         to comfortably ingest/produce a lot of text fast:
-#                         processing the Jungle Scout competitor data, and
-#                         writing the actual listing.
+#   LISTING_DATA_MODEL   groq/compound-mini — UPDATED 2026: the previous
+#                         model here (meta-llama/llama-4-scout-17b-16e-instruct)
+#                         was deprecated by Groq (shutdown 07/17/26, confirmed
+#                         via console.groq.com/docs/deprecations). Nearly every
+#                         other general-purpose Groq model has also been
+#                         deprecated in favor of openai/gpt-oss-120b or
+#                         qwen/qwen3.6-27b — both already used elsewhere below,
+#                         so reusing either here would collapse the "5 distinct
+#                         models" design. groq/compound-mini is Groq's
+#                         production/GA agentic system (fast tier) and remains
+#                         a genuinely distinct, currently-active model ID.
+#                         Used for the two jobs that need to comfortably
+#                         ingest/produce a lot of text fast: CompetitorGapAgent
+#                         (processes Jungle Scout data) and ListingGeneratorAgent
+#                         (writes the actual listing).
 #
 #   SUBAGENT_MODEL_FAST       openai/gpt-oss-20b       — fastest model on the
 #                              platform (1000 t/s). Simple structured-extraction
 #                              jobs: cleaning up scraped ASIN data.
-#   SUBAGENT_MODEL_REASONING  qwen/qwen3-32b            — stronger reasoning for
-#                              a genuinely judgment-based job: reading raw
-#                              customer reviews for sentiment and pain points.
+#   SUBAGENT_MODEL_REASONING  groq/compound — UPDATED 2026: the previous model
+#                              here (qwen/qwen3-32b) was deprecated by Groq
+#                              (shutdown 07/17/26, same notice as above).
+#                              groq/compound is Groq's production/GA agentic
+#                              system, used for the genuinely judgment-based
+#                              job: ReviewInsightAgent (reading raw customer
+#                              reviews for sentiment and pain points).
 #   SUBAGENT_MODEL_RETRIEVAL  qwen/qwen3.6-27b          — third distinct lab,
 #                              used for the two remaining mechanical jobs:
 #                              filtering RAG snippets and merging keyword lists.
 #
-# All five are open-weight models on Groq's free/on-demand tier. Override any
-# of them via the matching environment variable in .env without touching code.
+# All five model IDs are on Groq's free/on-demand tier. Override any of them
+# via the matching environment variable in .env without touching code.
+#
+# NOTE (2026 model landscape): Groq has consolidated nearly its entire
+# general-purpose text lineup down to openai/gpt-oss-120b, openai/gpt-oss-20b,
+# and qwen/qwen3.6-27b — every other named alternative (Llama 3.x, Llama 4
+# Scout/Maverick, Qwen3-32B, Kimi K2/K2-0905, DeepSeek R1 Distill) has been
+# deprecated. groq/compound and groq/compound-mini are agentic SYSTEMS built
+# on top of gpt-oss-120b + Llama models (per Groq's own docs) rather than
+# wholly separate base models — they were chosen here specifically because
+# they are the only other currently-active, distinct model IDs Groq offers,
+# not because they're architecturally unrelated to the other three. If Groq
+# deprecates these too, check console.groq.com/docs/models before picking a
+# replacement — do not guess a model name without verifying it's still active.
 # ---------------------------------------------------------------------------
 MANAGER_MODEL = os.getenv("MANAGER_MODEL", "openai/gpt-oss-120b")
-LISTING_DATA_MODEL = os.getenv("LISTING_DATA_MODEL", "meta-llama/llama-4-scout-17b-16e-instruct")
+LISTING_DATA_MODEL = os.getenv("LISTING_DATA_MODEL", "groq/compound-mini")
 SUBAGENT_MODEL_FAST = os.getenv("SUBAGENT_MODEL_FAST", "openai/gpt-oss-20b")
-SUBAGENT_MODEL_REASONING = os.getenv("SUBAGENT_MODEL_REASONING", "qwen/qwen3-32b")
+SUBAGENT_MODEL_REASONING = os.getenv("SUBAGENT_MODEL_REASONING", "groq/compound")
 SUBAGENT_MODEL_RETRIEVAL = os.getenv("SUBAGENT_MODEL_RETRIEVAL", "qwen/qwen3.6-27b")
 
 # Backward-compatible aliases — some older code/comments referred to these
@@ -520,9 +545,10 @@ PLATFORM_REQUIRED_MARKER = {
 
 class ListingGeneratorAgent(SubAgent):
     """
-    Runs on LISTING_DATA_MODEL (meta-llama/llama-4-scout-17b-16e-instruct) —
-    highest TPM of any candidate model and 750 t/s, matching your requirement
-    that "the subagent writing the listing... have high tokens and speed."
+    Runs on LISTING_DATA_MODEL (groq/compound-mini as of 2026 — the previous
+    meta-llama/llama-4-scout-17b-16e-instruct was deprecated by Groq), matching
+    your requirement that "the subagent writing the listing... have high
+    tokens and speed."
     Previously ran on the MANAGER_MODEL; moved deliberately per your request
     for a more varied model mix across the pipeline.
 
